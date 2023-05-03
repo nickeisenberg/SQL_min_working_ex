@@ -26,7 +26,7 @@ em_cont_df.to_csv('em_cont.csv')
 connection = pymysql.connect(
     host='test-server-azure.mysql.database.azure.com',
     user='nickeisenberg',
-    password='Pickle123!',
+    password='',
 )
 
 # We can view tables from the database
@@ -66,7 +66,7 @@ host = "test-server-azure.mysql.database.azure.com"
 schema = "person_info"
 port = 3306
 user = "nickeisenberg"
-p_w = "Pickle123!"
+p_w = ""
 cnx = alc.create_engine(f'mysql+pymysql://{user}:{p_w}@{host}:{port}/{schema}', echo=False)
 
 sql_code = "DROP TABLE IF EXISTS person_info.emergency_contact; "
