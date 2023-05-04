@@ -20,7 +20,7 @@ em_cont_df = pd.DataFrame(
     data=[names, numbers, relation]
 ).T
 
-em_cont_df.to_csv('em_cont.csv')
+em_cont_df.to_csv('em_cont.csv', index=False)
 
 # Open a connection to the database
 connection = pymysql.connect(
@@ -85,4 +85,6 @@ em_cont_df.to_sql(
     if_exists='append',
     index=False
 )
+
+connection.close()
 
