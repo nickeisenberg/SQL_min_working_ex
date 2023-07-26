@@ -61,7 +61,6 @@ connection.commit()
 
 # Instead of inserting line by line, we can insert the whole dataframe
 # using sqlalchemy.
-
 host = "test-server-azure.mysql.database.azure.com"
 schema = "person_info"
 port = 3306
@@ -85,6 +84,5 @@ em_cont_df.to_sql(
     if_exists='append',
     index=False
 )
-
 connection.close()
 
