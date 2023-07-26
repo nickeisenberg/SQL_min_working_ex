@@ -7,8 +7,8 @@ import numpy as np
 
 f = faker.Faker()
 
+# set up the classes to make the tables and add the rows
 base = Base()
-
 
 class personal_info(base):
     __tablename__='personal_info'
@@ -39,5 +39,27 @@ class item_purchased(base):
     def __init__(self):
         self.item = items[np.random.randint(0, 4)]
 
+# set up the connection to the datebase.
+engine = sql.create_engine('sqlite:///purchases.db')
+base.metadata.create_all(bind=engine)
 
+# add the rows
+session  = sessionmaker(bind=engine)()
+for i in range(1):
+    pers = personal_info()
+    it = item_purchased()
+    session.add(pers)
+    session.add(it)
+session.commit()
+
+# read the rows from the tables
+con = sqlite3.connect('purchases.db')
+
+cursor = con.execute('select * from personal_info')
+for row in cursor:
+    print(row)
+
+cursor = con.execute('select * from item_purchased')
+for row in cursor:
+    print(row)
 
