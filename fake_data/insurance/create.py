@@ -11,91 +11,105 @@ from insurance.constants import JOBS, SALARY_AVG
 _fk = faker.Faker()
 _base = Base()
 
-class Mailing(_base):
-    # table name for User model
-    __tablename__ = "mailing"
+def Mailing(base):
 
-    # user columns
-    person_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    first_name = db.Column(db.String(50))
-    last_name = db.Column(db.String(50))
-    address = db.Column(db.String(128))
-    city = db.Column(db.String(128))
-    state = db.Column(db.String(128))
-    zip = db.Column(db.Integer())
- 
-    def __init__(
-        self,
-        first_name,
-        last_name,
-        address,
-        city,
-        state,
-        zip
-    ):
-        self.first_name = first_name
-        self.last_name = last_name
-        self.address = address
-        self.city = city
-        self.state = state
-        self.zip = zip
+    class _Mailing(base):
+        # table name for User model
+        __tablename__ = "mailing"
+    
+        # user columns
+        person_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+        first_name = db.Column(db.String(50))
+        last_name = db.Column(db.String(50))
+        address = db.Column(db.String(128))
+        city = db.Column(db.String(128))
+        state = db.Column(db.String(128))
+        zip = db.Column(db.Integer())
+     
+        def __init__(
+            self,
+            first_name,
+            last_name,
+            address,
+            city,
+            state,
+            zip
+        ):
+            self.first_name = first_name
+            self.last_name = last_name
+            self.address = address
+            self.city = city
+            self.state = state
+            self.zip = zip
 
+    return _Mailing
 
+def Employment(base):
 
-class Employment(_base):
-    # table name for User model
-    __tablename__ = "employment"
+    class _Employment(base):
+        # table name for User model
+        __tablename__ = "employment"
+    
+        # user columns
+        person_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+        job = db.Column(db.String(50))
+        salery = db.Column(db.Integer())
+        start_date = db.Column(db.String(10))
+     
+        def __init__(self, salery, job, start_date):
+            self.salery = salery
+            self.job = job
+            self.start_date = start_date
 
-    # user columns
-    person_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    job = db.Column(db.String(50))
-    salery = db.Column(db.Integer())
-    start_date = db.Column(db.String(10))
- 
-    def __init__(self, salery, job, start_date):
-        self.salery = salery
-        self.job = job
-        self.start_date = start_date
+    return _Employment
 
-class Finances(_base):
-    # table name for User model
-    __tablename__ = "finances"
+def Finances(base):
 
-    # user columns
-    person_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    bank_act = db.Column(db.String(20))
-    savings = db.Column(db.Integer())
- 
-    def __init__(self, bank_act, savings):
-        self.bank_act = bank_act
-        self.savings = savings
+    class _Finances(base):
+        # table name for User model
+        __tablename__ = "finances"
+    
+        # user columns
+        person_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+        bank_act = db.Column(db.String(20))
+        savings = db.Column(db.Integer())
+     
+        def __init__(self, bank_act, savings):
+            self.bank_act = bank_act
+            self.savings = savings
 
-class Dependents(_base):
+    return _Finances
 
-    __tablename__ = "dependents"
-    dependent_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-    policyholder_id = db.Column(db.Integer())
-    first_name = db.Column(db.String(50))
-    last_name = db.Column(db.String(50))
-    same_residence = db.Column(db.Boolean())
-    is_student = db.Column(db.Boolean())
-    is_employed = db.Column(db.Boolean())
+def Dependents(base):
 
-    def __init__(
-        self,
-        policyholder_id,
-        first_name,
-        last_name,
-        same_residence,
-        is_student,
-        is_employed,
-    ):
-        self.policyholder_id = policyholder_id 
-        self.first_name = first_name
-        self.last_name = last_name
-        self.same_residence = same_residence
-        self.is_student = is_student
-        self.is_employed = is_employed
+    class _Dependents(base):
+    
+        __tablename__ = "dependents"
+        dependent_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+        policyholder_id = db.Column(db.Integer())
+        first_name = db.Column(db.String(50))
+        last_name = db.Column(db.String(50))
+        same_residence = db.Column(db.Boolean())
+        is_student = db.Column(db.Boolean())
+        is_employed = db.Column(db.Boolean())
+    
+        def __init__(
+            self,
+            policyholder_id,
+            first_name,
+            last_name,
+            same_residence,
+            is_student,
+            is_employed,
+        ):
+            self.policyholder_id = policyholder_id 
+            self.first_name = first_name
+            self.last_name = last_name
+            self.same_residence = same_residence
+            self.is_student = is_student
+            self.is_employed = is_employed
+
+    return _Dependents
 
 
 def salary_generator(avg_sal):
@@ -121,8 +135,9 @@ def savings_generator(avg_sal):
 
 
 def startdate_generator(
-        start=dt.datetime(2000, 1, 1),
-        end=dt.datetime(2023, 8, 15)):
+    start=dt.datetime(2000, 1, 1),
+    end=dt.datetime(2023, 8, 15),
+):
     start_date = dt.datetime.strftime(
         _fk.date_between(start, end), '%Y-%m-%d'
     )
@@ -144,14 +159,14 @@ class Create:
         Dependents=Dependents
     ):
         self.base = base
-        self.Mailing = Mailing
-        self.Employlment = Employment 
-        self.Finances = Finances 
-        self.Dependents = Dependents
+        self.Mailing = Mailing(base)
+        self.Employment = Employment(base)
+        self.Finances = Finances(base) 
+        self.Dependents = Dependents(base)
         self._initialized = False
 
 
-    def initialize(self, engine, no_entries):
+    def initialize(self, engine, with_entries=True, no_entries=5):
         if self._initialized:
           raise Exception("Database already initialized.")
 
@@ -163,10 +178,13 @@ class Create:
         self.base.metadata.create_all(bind=engine)
 
         self._initialized = True
+        
+        if not with_entries:
+            return None
 
         session  = sessionmaker(bind=engine)()
         for i in range(no_entries):
-            mailing = Mailing(
+            mailing = self.Mailing(
                 _fk.first_name(),
                 _fk.last_name(),
                 _fk.street_address(),
@@ -176,13 +194,13 @@ class Create:
             )
             session.add(mailing)
             job = np.random.choice(JOBS)
-            employment = Employment(
+            employment = self.Employment(
                 salary_generator(SALARY_AVG[job]),
                 job,
                 startdate_generator()
             )
             session.add(employment)
-            finances = Finances(
+            finances = self.Finances(
                 _fk.bban(),
                 savings_generator(SALARY_AVG[job]),
             )
@@ -190,7 +208,7 @@ class Create:
             num_dependents = dependent_generator()
             if num_dependents > 0:
                 for dep in range(num_dependents):
-                    dependents = Dependents(
+                    dependents = self.Dependents(
                         policyholder_id=int(i + 1),
                         first_name=_fk.first_name(),
                         last_name=_fk.last_name(),

@@ -1,4 +1,5 @@
 import sqlalchemy as db
+from sqlalchemy.orm import declarative_base as Base
 from insurance.create import Create 
 import numpy as np
 import pandas as pd
@@ -14,9 +15,11 @@ engine = db.create_engine(
 # engine = db.create_engine(f'sqlite:///{path}')
 
 # initialize the class and the database
-database = Create()
 
-database.initialize(engine, 5)
+base = Base()
+database = Create(base=base)
+
+database.initialize(engine, no_entries=5)
 
 # add some dependents after the fact
 
@@ -25,16 +28,7 @@ with engine.begin() as conn:
         db.text("""select * from dependents"""), engine
     )
 
-dependent_df.head()
-
-columns=[
-    'policyholder_id',
-    'first_name',
-    'last_name',
-    'same_residence',
-    'is_student',
-    'is_employed'
-]
+columns = dependent_df.columns.values[1:]
 
 policyholder_id = [1, 1, 1]
 first_name = ['nick', 'jack', 'jane']
