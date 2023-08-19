@@ -1,15 +1,7 @@
 import sqlalchemy as db
-from insurance.create import Create 
-import numpy as np
-import pandas as pd
 from sqlalchemy.orm import declarative_base as Base
 
 base = Base()
-
-# mysql
-engine = db.create_engine(
-    'mysql+pymysql://root:@127.0.0.1:3306/practice?unix_socket=/tmp/mysql.sock'
-)
 
 class Table(base):
 
@@ -35,6 +27,7 @@ class Table2(base):
     ):
         self.row_info = row_info
 
+base.metadata.sorted_tables
 
 #--------------------------------------------------
 meta = db.MetaData()
@@ -64,8 +57,8 @@ def User2(metadata):
 user = User(meta)
 user2 = User2(meta)
 
-type(user)
+meta.sorted_tables
 
 base = Base(metadata=meta)
 
-
+base.metadata.sorted_tables
