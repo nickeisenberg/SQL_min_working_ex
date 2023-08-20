@@ -6,9 +6,10 @@ from sqlalchemy_utils import create_database, database_exists, drop_database
 import datetime as dt
 import faker
 import numpy as np
-from insurance.constants import JOBS, SALARY_AVG
+from parents_and_children.constants import JOBS, SALARY_AVG
 
 _fk = faker.Faker()
+
 _base = Base()
 
 def Mailing(base):
@@ -18,7 +19,7 @@ def Mailing(base):
         __tablename__ = "mailing"
     
         # user columns
-        person_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+        parent_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
         first_name = db.Column(db.String(50))
         last_name = db.Column(db.String(50))
         address = db.Column(db.String(128))
@@ -51,7 +52,7 @@ def Employment(base):
         __tablename__ = "employment"
     
         # user columns
-        person_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+        parent_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
         job = db.Column(db.String(50))
         salery = db.Column(db.Integer())
         start_date = db.Column(db.String(10))
@@ -70,7 +71,7 @@ def Finances(base):
         __tablename__ = "finances"
     
         # user columns
-        person_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+        parent_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
         bank_act = db.Column(db.String(20))
         savings = db.Column(db.Integer())
      
@@ -80,13 +81,16 @@ def Finances(base):
 
     return _Finances
 
-def Dependents(base):
 
-    class _Dependents(base):
+def Children(base):
+
+    class _Children(base):
     
-        __tablename__ = "dependents"
-        dependent_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
-        policyholder_id = db.Column(db.Integer())
+        __tablename__ = "children"
+
+        child_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
+        parent1_id = db.Column(db.Integer())
+        parent2_id = db.Column(db.Integer())
         first_name = db.Column(db.String(50))
         last_name = db.Column(db.String(50))
         same_residence = db.Column(db.Boolean())
@@ -95,21 +99,23 @@ def Dependents(base):
     
         def __init__(
             self,
-            policyholder_id,
+            parent1_id,
+            parent2_id,
             first_name,
             last_name,
             same_residence,
             is_student,
             is_employed,
         ):
-            self.policyholder_id = policyholder_id 
+            self.parent1_id = parent1_id 
+            self.parent2_id = parent2_id 
             self.first_name = first_name
             self.last_name = last_name
             self.same_residence = same_residence
             self.is_student = is_student
             self.is_employed = is_employed
 
-    return _Dependents
+    return _Children
 
 
 def salary_generator(avg_sal):
@@ -144,10 +150,6 @@ def startdate_generator(
     return start_date
 
 
-def dependent_generator():
-    return int(abs(np.random.gamma(1, 1.3)))
-
-
 class Create:
 
     def __init__(
@@ -156,17 +158,19 @@ class Create:
         Mailing=Mailing,
         Employment=Employment,
         Finances=Finances,
-        Dependents=Dependents
+        Children=Children
     ):
         self.base = base
         self.Mailing = Mailing(base)
         self.Employment = Employment(base)
         self.Finances = Finances(base) 
-        self.Dependents = Dependents(base)
+        self.Children = Children(base)
         self._initialized = False
 
 
-    def initialize(self, engine, with_entries=True, no_entries=5):
+    def initialize(
+            self, engine, with_entries=True, no_parents=5, no_children=9
+        ):
         if self._initialized:
           raise Exception("Database already initialized.")
 
@@ -183,7 +187,7 @@ class Create:
             return None
 
         session  = sessionmaker(bind=engine)()
-        for i in range(no_entries):
+        for i in range(no_parents):
             mailing = self.Mailing(
                 _fk.first_name(),
                 _fk.last_name(),
@@ -205,18 +209,36 @@ class Create:
                 savings_generator(SALARY_AVG[job]),
             )
             session.add(finances)
-            num_dependents = dependent_generator()
-            if num_dependents > 0:
-                for dep in range(num_dependents):
-                    dependents = self.Dependents(
-                        policyholder_id=int(i + 1),
-                        first_name=_fk.first_name(),
-                        last_name=_fk.last_name(),
-                        same_residence=[False, True][np.random.binomial(1, .8)],
-                        is_student=[False, True][np.random.binomial(1, .8)],
-                        is_employed=[False, True][np.random.binomial(1, .6)]
-                    )
-                    session.add(dependents)
+       
+        for _child in range(no_children):
+
+            parent_ids = np.hstack((None, np.arange(1, no_parents)))
+            
+            parents = np.random.choice(parent_ids, replace=False, size=2)
+            
+            try:
+                p1 = int(parents[0])
+            except:
+                p1 = None
+            try:
+                p2 = int(parents[1])
+            except:
+                p2 = None
+
+            if p1 is None:
+                p1, p2 = p2, p1
+
+            child = self.Children(
+                parent1_id=p1,
+                parent2_id=p2,
+                first_name=_fk.first_name(),
+                last_name=_fk.last_name(),
+                same_residence=[False, True][np.random.binomial(1, .8)],
+                is_student=[False, True][np.random.binomial(1, .8)],
+                is_employed=[False, True][np.random.binomial(1, .6)]
+            )
+            session.add(child)
+
         session.commit()
 
         return None

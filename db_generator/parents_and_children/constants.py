@@ -12,4 +12,3 @@ SALARY_AVG = np.array([
 ])
 SALARY_AVG = {j: s for j, s in zip(JOBS, SALARY_AVG)}
 SALARY_AVG['unemployed'] = 0
-
