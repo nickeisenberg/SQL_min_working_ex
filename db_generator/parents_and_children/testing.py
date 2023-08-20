@@ -19,7 +19,7 @@ engine = db.create_engine(
 base = Base()
 database = Create(base=base)
 
-database.initialize(engine, no_parents=5)
+database.initialize(engine, no_parents=5, no_children=10)
 
 # add some dependents after the fact
 
