@@ -90,7 +90,7 @@ def Children(base):
 
         child_id = db.Column(db.Integer(), primary_key=True, autoincrement=True)
         parent1_id = db.Column(db.Integer())
-        parent2_id = db.Column(db.Integer())
+        parent2_id = db.Column(db.Integer(), nullable=True)
         first_name = db.Column(db.String(50))
         last_name = db.Column(db.String(50))
         same_residence = db.Column(db.Boolean())

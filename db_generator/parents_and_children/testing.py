@@ -22,11 +22,7 @@ database = Create(base=base)
 database.initialize(engine, no_parents=5, no_children=10)
 
 # add some dependents after the fact
-
-with engine.begin() as conn:
-    children_df = pd.read_sql_query(
-        db.text("""select * from children"""), engine
-    )
+children_df = pd.read_sql("""select * from children""", engine)
 
 columns = children_df.columns.values[1:]
 
