@@ -1,11 +1,16 @@
 ## Generated database contents
 
-| Tables  |
-|-------------- |
-| mailing       |
-| employment    |
-| finances      |
-| children      |
+
+| Field      | Type         | Null | Key | Default | Extra          |
+|------------|--------------|------|-----|---------|----------------|
+| parent_id  | int          | NO   | PRI | NULL    | auto_increment |
+| first_name | varchar(50)  | YES  |     | NULL    |                |
+| last_name  | varchar(50)  | YES  |     | NULL    |                |
+| address    | varchar(128) | YES  |     | NULL    |                |
+| city       | varchar(128) | YES  |     | NULL    |                |
+| state      | varchar(128) | YES  |     | NULL    |                |
+| zip        | int          | YES  |     | NULL    |                |
+|------------|--------------|------|-----|---------|----------------|
 
 
 ## How to use
