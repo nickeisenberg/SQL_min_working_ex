@@ -20,6 +20,7 @@ from utils import engine_generator
 from parents_and_children.create import Create
 from sqlalchemy.orm import declarative_base as Base
 
+# mysql
 engine = engine_generator(
     dialect='mysql', 
     driver='pymysql', 
@@ -30,20 +31,25 @@ engine = engine_generator(
     unix_socket='/tmp/mysql.sock'
 )
 
+# sqlite
+path = "<path_to_where_you_want_you_sqlite.db_file>"
+engine = db.create_engine(f'sqlite:///{path}')
+
 base = Base()
 database = Create(engine=engine, base=base)
 database.initialize(no_parents=10, no_children=5)
 ```
 
-* The database is now generated. As a simple test, you can run the following:c
+* The database is now generated. As a simple test, you can run the following:
 ```python
 import pandas as pd
 
 pd.read_sql("""select * from employment""", engine)
 ```
 
-* Now use any database IDE. There are also some practice questions listed in
-each of the database generator subdirectories that you can use for practice.
+* Now use any database IDE to run queries. There are also some practice 
+questions listed in each of the database generator subdirectories that 
+you can use for practice.
 
 
 
