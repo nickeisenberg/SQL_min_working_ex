@@ -9,6 +9,7 @@ import numpy as np
 from parents_and_children.constants import JOBS, SALARY_AVG
 from copy import deepcopy
 
+
 _fk = faker.Faker()
 
 _base = Base()
@@ -185,13 +186,29 @@ class Create:
 
 
     def initialize(
-            self, with_entries=True, no_parents=5, no_children=9
-        ):
+            self,
+        no_jobs=len(JOBS),
+        include_unemployed=True,
+        with_entries=True,
+        drop_db_if_exists=True,
+        no_parents=5,
+        no_children=9
+    ):
+
+        jobs = JOBS[: no_jobs]
+        salary_avg = {j: SALARY_AVG[j] for j in jobs}
+
+        if include_unemployed:
+            jobs.append('unemployed')
+            salary_avg['unemployed'] = 0
+
         if self._initialized:
           raise Exception("Database already initialized.")
+        
+        if drop_db_if_exists:
+            if database_exists(self.engine.url):
+                drop_database(self.engine.url) 
 
-        if database_exists(self.engine.url):
-            drop_database(self.engine.url) 
         if not database_exists(self.engine.url):
             create_database(self.engine.url) 
 
@@ -214,8 +231,8 @@ class Create:
             )
             session.add(mailing)
 
-            job = np.random.choice(JOBS)
-            sal_sav = SalSavStartGen(SALARY_AVG[job])
+            job = np.random.choice(jobs)
+            sal_sav = SalSavStartGen(salary_avg[job])
             employment = self.Employment(
                 sal_sav.salary,
                 # salary_generator(SALARY_AVG[job]),

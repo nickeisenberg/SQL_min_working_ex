@@ -38,7 +38,14 @@ engine = db.create_engine(f'sqlite:///{path}')
 
 base = Base()
 database = Create(engine=engine, base=base)
-database.initialize(no_parents=10, no_children=5)
+database.initialize(
+        no_jobs=5,
+        include_unemployed=True,
+        with_entries=True,
+        drop_db_if_exists=True,
+        no_parents=5,
+        no_children=10
+    )
 ```
 
 * The database is now generated. As a simple test, you can run the following:
