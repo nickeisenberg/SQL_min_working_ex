@@ -1,3 +1,13 @@
+## Generated database contents
+
+| Tables  |
+|-------------- |
+| mailing       |
+| employment    |
+| finances      |
+| children      |
+
+
 ## How to use
 * First clone or fork the repo onto your machine.
 * To create the database, you first need to create an engine.
