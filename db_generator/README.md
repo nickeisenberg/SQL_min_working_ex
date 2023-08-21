@@ -16,6 +16,7 @@ the engine simply becomes `sqlalchemy.create_engine('sqlite:///<path_to_db>')`.
 (the following is for mysql and the parents_and_children generator):
 
 ```python
+import sqlalchemy as db
 from utils import engine_generator
 from parents_and_children.create import Create
 from sqlalchemy.orm import declarative_base as Base
