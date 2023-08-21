@@ -83,12 +83,12 @@ engine = db.create_engine(f'sqlite:///{path}')
 base = Base()
 database = Create(engine=engine, base=base)
 database.initialize(
-        no_jobs=5,
-        include_unemployed=True,
-        with_entries=True,
-        drop_db_if_exists=True,
-        no_parents=5,
-        no_children=10
+        no_jobs=5,  # there are 15 possible jobs
+        include_unemployed=True,  # this will include unemployment
+        with_entries=True,  # populate the database with <no_parents> entries
+        no_parents=5,  # number of parents
+        no_children=10,  # number of children randomly assigned to parents
+        drop_db_if_exists=True,  # will drop and recreate the database if exists
     )
 ```
 
