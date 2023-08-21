@@ -17,12 +17,14 @@ engine = db.create_engine(
 # initialize the class and the database
 
 base = Base()
-database = Create(base=base)
+database = Create(engine=engine, base=base)
 
-database.initialize(engine, no_parents=5, no_children=10)
+database.initialize(no_parents=5, no_children=10)
 
 # add some dependents after the fact
 children_df = pd.read_sql("""select * from children""", engine)
+
+children_df.columns.values
 
 columns = children_df.columns.values[1:]
 

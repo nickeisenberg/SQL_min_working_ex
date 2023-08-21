@@ -154,12 +154,14 @@ class Create:
 
     def __init__(
         self,
+        engine,
         base=_base,
         Mailing=Mailing,
         Employment=Employment,
         Finances=Finances,
         Children=Children
     ):
+        self.engine = engine
         self.base = base
         self.Mailing = Mailing(base)
         self.Employment = Employment(base)
@@ -169,24 +171,24 @@ class Create:
 
 
     def initialize(
-            self, engine, with_entries=True, no_parents=5, no_children=9
+            self, with_entries=True, no_parents=5, no_children=9
         ):
         if self._initialized:
           raise Exception("Database already initialized.")
 
-        if database_exists(engine.url):
-            drop_database(engine.url) 
-        if not database_exists(engine.url):
-            create_database(engine.url) 
+        if database_exists(self.engine.url):
+            drop_database(self.engine.url) 
+        if not database_exists(self.engine.url):
+            create_database(self.engine.url) 
 
-        self.base.metadata.create_all(bind=engine)
+        self.base.metadata.create_all(bind=self.engine)
 
         self._initialized = True
         
         if not with_entries:
             return None
 
-        session  = sessionmaker(bind=engine)()
+        session  = sessionmaker(bind=self.engine)()
         for i in range(no_parents):
             mailing = self.Mailing(
                 _fk.first_name(),
