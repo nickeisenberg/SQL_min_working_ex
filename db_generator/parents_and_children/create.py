@@ -232,8 +232,11 @@ class Create:
                 # savings_generator(SALARY_AVG[job]),
             )
             session.add(finances)
-       
-        for _child in range(no_children):
+        
+        count = 0
+        p = np.exp(-np.arange(6) / 1.3)
+        p /= p.sum()
+        while count < no_children:
 
             parent_ids = np.hstack((None, np.arange(1, no_parents)))
             
@@ -251,16 +254,20 @@ class Create:
             if p1 is None:
                 p1, p2 = p2, p1
 
-            child = self.Children(
-                parent1_id=p1,
-                parent2_id=p2,
-                first_name=_fk.first_name(),
-                last_name=_fk.last_name(),
-                same_residence=[False, True][np.random.binomial(1, .8)],
-                is_student=[False, True][np.random.binomial(1, .8)],
-                is_employed=[False, True][np.random.binomial(1, .6)]
-            )
-            session.add(child)
+            amt = np.random.choice(np.arange(6), p=p)
+            amt = amt if count + amt <= no_children else no_children - count
+            count += amt
+            for i in range(amt):
+                child = self.Children(
+                    parent1_id=p1,
+                    parent2_id=p2,
+                    first_name=_fk.first_name(),
+                    last_name=_fk.last_name(),
+                    same_residence=[False, True][np.random.binomial(1, .8)],
+                    is_student=[False, True][np.random.binomial(1, .8)],
+                    is_employed=[False, True][np.random.binomial(1, .6)]
+                )
+                session.add(child)
 
         session.commit()
 
