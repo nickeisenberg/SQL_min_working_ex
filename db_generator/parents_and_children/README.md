@@ -1,4 +1,4 @@
-## How t0 use
+## How to use
 * First clone or fork the repo onto your machine.
 * To create the database, you first need to create an engine.
 See [this link](https://docs.sqlalchemy.org/en/20/core/engines.html) for
