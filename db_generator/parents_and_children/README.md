@@ -1,5 +1,9 @@
-## Generated database contents
+# Generated database contents
 
+## Tables
+
+### mailing
+`show columns from mailing;` 
 
 | Field      | Type         | Null | Key | Default | Extra          |
 |------------|--------------|------|-----|---------|----------------|
@@ -10,7 +14,39 @@
 | city       | varchar(128) | YES  |     | NULL    |                |
 | state      | varchar(128) | YES  |     | NULL    |                |
 | zip        | int          | YES  |     | NULL    |                |
-|------------|--------------|------|-----|---------|----------------|
+
+### employment
+`show columns from employment;` 
+
+| Field      | Type        | Null | Key | Default | Extra          |
+|------------|-------------|------|-----|---------|----------------|
+| parent_id  | int         | NO   | PRI | NULL    | auto_increment |
+| job        | varchar(50) | YES  |     | NULL    |                |
+| salery     | int         | YES  |     | NULL    |                |
+| start_date | varchar(10) | YES  |     | NULL    |                |
+
+### finances
+`show columns from finances;` 
+
+| Field     | Type        | Null | Key | Default | Extra          |
+|-----------|-------------|------|-----|---------|----------------|
+| parent_id | int         | NO   | PRI | NULL    | auto_increment |
+| bank_act  | varchar(20) | YES  |     | NULL    |                |
+| savings   | int         | YES  |     | NULL    |                |
+
+### children 
+`show columns from children;` 
+
+| Field          | Type        | Null | Key | Default | Extra          |
+|----------------|-------------|------|-----|---------|----------------|
+| child_id       | int         | NO   | PRI | NULL    | auto_increment |
+| parent1_id     | int         | YES  |     | NULL    |                |
+| parent2_id     | int         | YES  |     | NULL    |                |
+| first_name     | varchar(50) | YES  |     | NULL    |                |
+| last_name      | varchar(50) | YES  |     | NULL    |                |
+| same_residence | tinyint(1)  | YES  |     | NULL    |                |
+| is_student     | tinyint(1)  | YES  |     | NULL    |                |
+| is_employed    | tinyint(1)  | YES  |     | NULL    |                |
 
 
 ## How to use
