@@ -7,6 +7,7 @@ import datetime as dt
 import faker
 import numpy as np
 from parents_and_children.constants import JOBS, SALARY_AVG
+from copy import deepcopy
 
 _fk = faker.Faker()
 
@@ -56,11 +57,13 @@ def Employment(base):
         job = db.Column(db.String(50))
         salery = db.Column(db.Integer())
         start_date = db.Column(db.String(10))
+        # work_duration= db.Column(db.Float(4))
      
-        def __init__(self, salery, job, start_date):
+        def __init__(self, salery, job, start_date):  #, work_duration):
             self.salery = salery
             self.job = job
             self.start_date = start_date
+            # self.work_duration = work_duration
 
     return _Employment
 
@@ -117,37 +120,48 @@ def Children(base):
 
     return _Children
 
+class SalSavStartGen:
 
-def salary_generator(avg_sal):
-    if avg_sal == 0:
-        return 0
-    else:
-        sal_noise = max(
-            np.random.gamma(.1, avg_sal) - np.random.gamma(.1, avg_sal),
-            -1. * avg_sal / 2
-        )
-        return avg_sal + sal_noise
+    def __init__(self, avg):
+        self.salary = self.salary_generator(avg)
+        self.startdate, self.work_duration = self.startdate_generator()
+        self.savings = self.savings_generator()
+    
+    @staticmethod
+    def salary_generator(avg_sal):
+        if avg_sal == 0:
+            return 0
+        else:
+            sal_noise = max(
+                np.random.gamma(.1, avg_sal) - np.random.gamma(.1, avg_sal),
+                -1. * avg_sal / 2
+            )
+            return avg_sal + sal_noise
+    
+     
+    def savings_generator(self):
+        if self.salary == 0:
+            return np.random.gamma(.5, 50) - np.random.gamma(.1, 50)
+        else:
+            saving = np.random.normal(
+                self.salary * self.work_duration / 4,
+                self.salary / 8,
+            )
+            return saving
+    
+    @staticmethod
+    def startdate_generator(
+        start=dt.datetime(2000, 1, 1),
+        end=dt.datetime(2023, 8, 15),
+    ):
+        start_date = deepcopy(dt.datetime.strftime(
+            _fk.date_between(start, end), '%Y-%m-%d'
+        ))
 
+        work_duration = end - dt.datetime.strptime(start_date, '%Y-%m-%d')
+        work_duration = work_duration.days / 365
 
-def savings_generator(avg_sal):
-    if avg_sal == 0:
-        return np.random.gamma(.5, 50) - np.random.gamma(.1, 50)
-    else:
-        saving = np.random.normal(
-            avg_sal * 4,
-            avg_sal * 1.5,
-        )
-        return saving
-
-
-def startdate_generator(
-    start=dt.datetime(2000, 1, 1),
-    end=dt.datetime(2023, 8, 15),
-):
-    start_date = dt.datetime.strftime(
-        _fk.date_between(start, end), '%Y-%m-%d'
-    )
-    return start_date
+        return start_date, work_duration
 
 
 class Create:
@@ -199,16 +213,23 @@ class Create:
                 _fk.zipcode(),
             )
             session.add(mailing)
+
             job = np.random.choice(JOBS)
+            sal_sav = SalSavStartGen(SALARY_AVG[job])
             employment = self.Employment(
-                salary_generator(SALARY_AVG[job]),
+                sal_sav.salary,
+                # salary_generator(SALARY_AVG[job]),
                 job,
-                startdate_generator()
+                sal_sav.startdate,
+                # startdate_generator(),
+                # sal_sav.work_duration
             )
             session.add(employment)
+
             finances = self.Finances(
                 _fk.bban(),
-                savings_generator(SALARY_AVG[job]),
+                sal_sav.savings,
+                # savings_generator(SALARY_AVG[job]),
             )
             session.add(finances)
        

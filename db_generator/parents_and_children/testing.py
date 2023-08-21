@@ -19,28 +19,23 @@ engine = db.create_engine(
 base = Base()
 database = Create(engine=engine, base=base)
 
-database.initialize(no_parents=5, no_children=10)
+database.initialize(no_parents=10, no_children=10)
 
 # add some dependents after the fact
-children_df = pd.read_sql("""select * from children""", engine)
+emp_df = pd.read_sql("""select * from employment""", engine)
 
-children_df.columns.values
+emp_df.columns.values
 
-columns = children_df.columns.values[1:]
+columns = emp_df.columns.values[1:]
 
-parent1_id = [1, 1, 1]
-parent2_id = [2, 2, 2]
-first_name = ['nick', 'jack', 'jane']
-last_name = ['eisenberg', 'johnson', 'godall']
-same_residence = [True, True, False]
-is_student = [False, True, False]
-is_employed = [False, True, True]
+job = ['a', 'a']
+salary = [100.01, 1011.0234]
+start_date = ['1111', '1111']
 
 data = np.vstack(
-    [parent1_id, parent2_id, first_name, last_name, same_residence, is_student, is_employed]
+    [job, salary, start_date]
 ).T
 
-parent_df = pd.DataFrame(data=data, columns=columns)
-parent_df.replace({'True': 1, 'False': 0}, inplace=True)
+emp_df = pd.DataFrame(data=data, columns=columns)
 
-parent_df.to_sql('children', engine, index=False, if_exists='append')
+emp_df.to_sql('employment', engine, index=False, if_exists='append')
