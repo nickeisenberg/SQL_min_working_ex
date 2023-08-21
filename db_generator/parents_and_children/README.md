@@ -1,6 +1,5 @@
-# Generated database contents
-
 ## Tables
+The following tables will be generated after follwing the instructions below.
 
 ### mailing
 `show columns from mailing;` 
