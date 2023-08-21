@@ -1,5 +1,5 @@
 ## Tables
-The following tables will be generated after follwing the instructions below.
+The following tables will be generated after following the instructions below.
 
 ### mailing
 `show columns from mailing;` 
