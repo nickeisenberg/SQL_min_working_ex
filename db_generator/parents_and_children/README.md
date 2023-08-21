@@ -18,4 +18,6 @@ than one child.
 9. List the names of the family who have the highest combined income, again
 assuming that if the child works, then he or she earns %30 of the average of
 their parent's salary.
-10. How many parents have children with different partners? 
+10. How many parents have children with different partners? There may be a case
+where a parent has a None type parter. If this is the case, cosider "None" as
+a partner.
