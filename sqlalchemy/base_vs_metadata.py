@@ -1,6 +1,8 @@
 import sqlalchemy as db
 from sqlalchemy_utils import database_exists, create_database, drop_database
 from sqlalchemy.orm import declarative_base as Base
+from sqlalchemy.orm import sessionmaker
+
 
 engine = db.create_engine(
     "mysql+pymysql://root:@127.0.0.1:3306/_temp_?unix_socket=/tmp/mysql.sock"
