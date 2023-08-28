@@ -42,12 +42,5 @@ class Inventory(base):
         primary_key=True, 
     )
     inv = db.Column(db.Integer())
-    def __init__(self, item, inv):
-        self.item = item
-        self.inv = inv
 
 base.metadata.create_all(bind=engine)
-
-
-
-
