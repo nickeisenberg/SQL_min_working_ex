@@ -11,13 +11,15 @@ create table trans (
 );
 DROP TABLE IF EXISTS inventory;
 create table inventory (
-    item varchar(20) primary key,
+    item varchar(20),
+    trans_type Float,
     inv Int,
+    last_price Float,
     cost_basis Float,
     current_value Float,
-    breakeven Float,
     realized_profit Float,
-    gain Float
+    gain Float,
+    PRIMARY KEY(item, trans_type)
 );
 
 delimiter |
@@ -27,91 +29,98 @@ after insert on
     trans
 for each row
 begin
-if new.trans_type > 0 then
-    if new.action > 0 then
+if (new.trans_type > 0 and new.action > 0) then
         INSERT INTO
             inventory
         values 
             (
                 new.item, -- item 
-                new.no_units * new.action,  -- inv
-                new.at_price * (new.no_units * new.action),  -- cost_basis
-                new.at_price * (new.no_units * new.action),  -- current_value
-                0,  -- breakeven 
+                new.trans_type, -- trans_type 
+                new.no_units,  -- inv
+                new.at_price,  -- last_price
+                new.at_price,  -- cost_basis
+                new.at_price * new.no_units,  -- current_value
                 0,  -- realized_profit
                 0  -- gain
             ) 
         ON DUPLICATE KEY UPDATE
-            inv = inv + (new.no_units * new.action),
-            cost_basis = cost_basis + (new.at_price * new.no_units * new.action),
+            inv = inv + new.no_units,
+            last_price = new.at_price,
+            cost_basis = (
+                ((inv - new.no_units) * cost_basis) 
+                + new.no_units * last_price
+            ) / inv,
             current_value = inv * new.at_price,
-            breakeven = 0,
             realized_profit = realized_profit,
-            gain = 100.0 * (current_value + realized_profit - cost_basis) / cost_basis;
-    elseif new.action < 0 then
+            gain = 100.0 * (
+                current_value + realized_profit - (inv * cost_basis)
+            ) / (inv * cost_basis);
+elseif (new.trans_type > 0 and new.action < 0) then
         UPDATE inventory SET
-            inv = inv + (new.no_units * new.action),
+            inv = inv - new.no_units,
+            last_price = new.at_price,
             cost_basis = cost_basis,
             current_value = inv * new.at_price,
-            breakeven = 0,
-            realized_profit = realized_profit + (
-                new.no_units * -1.0 * new.action * new.at_price
-            ),
-            gain = 100.0 * (current_value + realized_profit - cost_basis) / cost_basis;
-    end if;
-elseif new.trans_type < 0 then
-    if new.action < 0 then
+            realized_profit = realized_profit + (new.no_units * new.at_price),
+            gain = 100.0 * (
+                current_value + realized_profit - (inv * cost_basis)
+            ) / (inv * cost_basis)
+        where trans_type = new.trans_type and item = new.item;
+elseif (new.trans_type < 0 and new.action < 0) then
         INSERT INTO
             inventory
         values 
             (
                 new.item, -- item 
-                new.no_units * new.action,  -- inv
-                new.at_price * (new.no_units * new.action),  -- cost_basis
-                new.at_price * (new.no_units * new.action),  -- current_value
-                new.at_price,  -- breakeven
-                new.at_price * (new.no_units),  -- realized_profit 
+                new.trans_type, -- trans_type 
+                new.no_units * -1.0,  -- inv
+                new.at_price,  -- last_price
+                new.at_price,  -- cost_basis
+                new.at_price * new.no_units * -1.0,  -- current_value
+                new.at_price * new.no_units,  -- realized_profit 
                 0  -- gain
             ) 
-        ON DUPLICATE KEY UPDATE
-            inv = inv + (new.no_units * new.action),
-            cost_basis = cost_basis + (new.at_price * new.no_units * new.action),
+        ON DUPLICATE KEY UPDATE 
+            inv = inv - new.no_units,
+            last_price = new.at_price,
+            cost_basis = (
+                (-1.0 * (inv + new.no_units) * cost_basis) 
+                + (new.no_units * new.at_price)
+            ) / inv * -1.0,
             current_value = inv * new.at_price,
-            breakeven = 0,
             realized_profit = realized_profit + (new.at_price * new.no_units),
-            gain = 0;
-    elseif new.action > 0 then
+            gain = 100.0 * (realized_profit + current_value) / realized_profit;
+elseif (new.trans_type < 0 and new.action > 0) then
         UPDATE inventory SET
-            inv = inv + (new.no_units * new.action),
-            cost_basis = cost_basis + (new.no_units * new.action * new.at_price),
+            inv = inv + new.no_units,
+            last_price = new.at_price,
+            cost_basis = cost_basis,
             current_value = inv * new.at_price,
-            breakeven = 0,
-            realized_profit = realized_profit 
-                - (new.no_units * new.at_price),
-            gain = 0;
-    end if;
+            realized_profit = realized_profit - (new.at_price * new.no_units),
+            gain = 100.0 * (realized_profit + current_value) / realized_profit
+        where trans_type = new.trans_type and item = new.item;
 end if;
 end;
 |
 delimiter ;
 
+-- long testing
 insert into trans (item, trans_type, action, no_units, at_price)
 values 
-    ('car', -1, -1, 10, 10),
-    ('car', -1, -1, 5, 15)
+    ('car', 1, 1, 5, 10),
+    ('car', 1, 1, 5, 20),
+    ('car', 1, -1, 5, 15),
+    ('car', 1, 1, 5, 10)
+;
+
+-- short testing
+insert into trans (item, trans_type, action, no_units, at_price)
+values 
+    ('car', -1, -1, 5, 20),
+    ('car', -1, -1, 5, 10),
+    ('car', -1, 1, 5, 5)
 ;
 
 select * from inventory;
 
 select * from trans;
-
-
-select cte.item, 100 * (profit + current_value) / cte.total as total from invetory
-left join (
-    select item, sum(no_units * at_price) as total
-    from trans
-    where action = 1
-    group by item
-) as cte
-on invetory.item = cte.item
-;
