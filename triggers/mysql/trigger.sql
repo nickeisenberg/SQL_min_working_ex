@@ -4,7 +4,8 @@ DROP TABLE IF EXISTS trans;
 create table trans (
     id Int primary key auto_increment,
     item varchar(20),
-    action Float,
+    trans_type Float,  -- 1 for buy and -1 for short
+    action Float,  -- 1 for buy and -1 for sell
     no_units Float,
     at_price Float
 );
@@ -25,44 +26,82 @@ after insert on
     trans
 for each row
 begin
-if new.action > 0 then
-    INSERT INTO
-        inventory
-    values 
-        (
-            new.item, -- item 
-            new.no_units * new.action,  -- inv
-            new.at_price * (new.no_units * new.action),  -- cost_basis
-            new.at_price * (new.no_units * new.action),  -- current_value
-            0,  -- realized_profit
-            0  -- gain
-        ) 
-    ON DUPLICATE KEY UPDATE
-        inv = inv + (new.no_units * new.action),
-        cost_basis = cost_basis + (new.at_price * new.no_units * new.action),
-        current_value = inv * new.at_price,
-        realized_profit = realized_profit,
-        gain = 100.0 * (current_value + realized_profit - cost_basis) / cost_basis;
-elseif new.action < 0 then
-    INSERT INTO
-        inventory
-    values 
-        (
-            new.item, -- item 
-            new.no_units * new.action,  -- inv
-            new.at_price * (new.no_units * new.action),  -- cost_basis
-            new.at_price * (new.no_units * new.action),  -- current_value
-            0,  -- realized_profit
-            0  -- gain
-        ) 
-    ON DUPLICATE KEY UPDATE
-        inv = inv + (new.no_units * new.action),
-        cost_basis = cost_basis,
-        current_value = inv * new.at_price,
-        realized_profit = realized_profit + (
-            new.no_units * -1.0 * new.action * new.at_price
-        ),
-        gain = 100.0 * (current_value + realized_profit - cost_basis) / cost_basis;
+if new.trans_type > 0 then
+    if new.action > 0 then
+        INSERT INTO
+            inventory
+        values 
+            (
+                new.item, -- item 
+                new.no_units * new.action,  -- inv
+                new.at_price * (new.no_units * new.action),  -- cost_basis
+                new.at_price * (new.no_units * new.action),  -- current_value
+                0,  -- realized_profit
+                0  -- gain
+            ) 
+        ON DUPLICATE KEY UPDATE
+            inv = inv + (new.no_units * new.action),
+            cost_basis = cost_basis + (new.at_price * new.no_units * new.action),
+            current_value = inv * new.at_price,
+            realized_profit = realized_profit,
+            gain = 100.0 * (current_value + realized_profit - cost_basis) / cost_basis;
+    elseif new.action < 0 then
+        INSERT INTO
+            inventory
+        values 
+            (
+                new.item, -- item 
+                new.no_units * new.action,  -- inv
+                new.at_price * (new.no_units * new.action),  -- cost_basis
+                new.at_price * (new.no_units * new.action),  -- current_value
+                0,  -- realized_profit
+                0  -- gain
+            ) 
+        ON DUPLICATE KEY UPDATE
+            inv = inv + (new.no_units * new.action),
+            cost_basis = cost_basis + (new.at_price * new.no_units * new.action),
+            current_value = inv * new.at_price,
+            realized_profit = realized_profit,
+            gain = 100.0 * (current_value + realized_profit - cost_basis) / cost_basis;
+    end if;
+elseif new.trans_type < 0 then
+    if new.action < 0 then
+        INSERT INTO
+            inventory
+        values 
+            (
+                new.item, -- item 
+                new.no_units * new.action,  -- inv
+                new.at_price * (new.no_units * new.action),  -- cost_basis
+                new.at_price * (new.no_units * new.action),  -- current_value
+                0,  -- realized_profit
+                0  -- gain
+            ) 
+        ON DUPLICATE KEY UPDATE
+            inv = inv + (new.no_units * new.action),
+            cost_basis = cost_basis + (new.at_price * new.no_units * new.action),
+            current_value = inv * new.at_price,
+            realized_profit = realized_profit,
+            gain = 100.0 * (current_value + realized_profit - cost_basis) / cost_basis;
+    elseif new.action > 0 then
+        INSERT INTO
+            inventory
+        values 
+            (
+                new.item, -- item 
+                new.no_units * new.action,  -- inv
+                new.at_price * (new.no_units * new.action),  -- cost_basis
+                new.at_price * (new.no_units * new.action),  -- current_value
+                0,  -- realized_profit
+                0  -- gain
+            ) 
+        ON DUPLICATE KEY UPDATE
+            inv = inv + (new.no_units * new.action),
+            cost_basis = cost_basis + (new.at_price * new.no_units * new.action),
+            current_value = inv * new.at_price,
+            realized_profit = realized_profit,
+            gain = 100.0 * (current_value + realized_profit - cost_basis) / cost_basis;
+    end if;
 end if;
 end;
 |
