@@ -8,13 +8,14 @@ create table trans (
     no_units Float,
     at_price Float
 );
-DROP TABLE IF EXISTS invetory;
-create table invetory (
+DROP TABLE IF EXISTS inventory;
+create table inventory (
     item varchar(20) primary key,
     inv Int,
     cost_basis Float,
     current_value Float,
     realized_profit Float,
+    gain Float
 );
 
 delimiter |
@@ -24,21 +25,45 @@ after insert on
     trans
 for each row
 begin
+if new.action > 0 then
     INSERT INTO
-        invetory
+        inventory
     values 
         (
-            new.item, 
-            new.no_units * new.action, 
-            new.at_price * inv,
-            -1 * new.at_price * new.no_units * new.action,
-            0
+            new.item, -- item 
+            new.no_units * new.action,  -- inv
+            new.at_price * (new.no_units * new.action),  -- cost_basis
+            new.at_price * (new.no_units * new.action),  -- current_value
+            0,  -- realized_profit
+            0  -- gain
         ) 
-    ON DUPLICATE KEY UPDATE    
-        inv = inv + new.no_units * new.action,
-        profit = profit - (new.no_units * new.at_price * new.action),
-        current_value = new.at_price * inv,
-        gain = 0;
+    ON DUPLICATE KEY UPDATE
+        inv = inv + (new.no_units * new.action),
+        cost_basis = cost_basis + (new.at_price * new.no_units * new.action),
+        current_value = inv * new.at_price,
+        realized_profit = realized_profit,
+        gain = 100.0 * (current_value + realized_profit - cost_basis) / cost_basis;
+elseif new.action < 0 then
+    INSERT INTO
+        inventory
+    values 
+        (
+            new.item, -- item 
+            new.no_units * new.action,  -- inv
+            new.at_price * (new.no_units * new.action),  -- cost_basis
+            new.at_price * (new.no_units * new.action),  -- current_value
+            0,  -- realized_profit
+            0  -- gain
+        ) 
+    ON DUPLICATE KEY UPDATE
+        inv = inv + (new.no_units * new.action),
+        cost_basis = cost_basis,
+        current_value = inv * new.at_price,
+        realized_profit = realized_profit + (
+            new.no_units * -1.0 * new.action * new.at_price
+        ),
+        gain = 100.0 * (current_value + realized_profit - cost_basis) / cost_basis;
+end if;
 end;
 |
 delimiter ;
@@ -47,11 +72,11 @@ insert into trans (item, action, no_units, at_price)
 values 
     ('car', 1, 2, 50),
     ('car', -1, 1, 100),
-    ('boat', 1, 2, 50),
-    ('boat', -1, 2, 25)
+    ('car', 5, 1, 20),
+    ('car', -1, 1, 1000)
 ;
 
-select * from invetory;
+select * from inventory;
 
 select * from trans;
 
