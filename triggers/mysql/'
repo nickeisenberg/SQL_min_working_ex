@@ -77,7 +77,6 @@ elseif new.trans_type < 0 then
             inv = inv + (new.no_units * new.action),
             cost_basis = cost_basis + (new.at_price * new.no_units * new.action),
             current_value = inv * new.at_price,
-            breakeven = 0,
             realized_profit = realized_profit + (new.at_price * new.no_units),
             gain = 0;
     elseif new.action > 0 then
@@ -85,7 +84,6 @@ elseif new.trans_type < 0 then
             inv = inv + (new.no_units * new.action),
             cost_basis = cost_basis + (new.no_units * new.action * new.at_price),
             current_value = inv * new.at_price,
-            breakeven = 0,
             realized_profit = realized_profit 
                 - (new.no_units * new.at_price),
             gain = 0;
@@ -97,8 +95,10 @@ delimiter ;
 
 insert into trans (item, trans_type, action, no_units, at_price)
 values 
-    ('car', -1, -1, 10, 10),
-    ('car', -1, -1, 5, 15)
+    ('car', 1, 1, 10, 10),
+    ('car', 1, -1, 5, 5),
+    ('car', 1, 1, 10, 2),
+    ('car', 1, -1, 5, 50)
 ;
 
 select * from inventory;
